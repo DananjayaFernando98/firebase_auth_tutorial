@@ -35,5 +35,12 @@ class AuthServices {
   //sign in using gmail
 
   //signout
-  
+  Future signOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (err) {
+      print(err.toString());
+      return null;
+    }
+  }
 }
