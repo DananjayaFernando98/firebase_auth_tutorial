@@ -1,5 +1,6 @@
 import 'package:firebase_auth_tutorial/screens/authentication/login.dart';
 import 'package:firebase_auth_tutorial/screens/authentication/register.dart';
+import 'package:firebase_auth_tutorial/screens/home/home.dart';
 import 'package:flutter/material.dart';
 
 class Authenticate extends StatefulWidget {
@@ -10,8 +11,25 @@ class Authenticate extends StatefulWidget {
 }
 
 class _AuthenticateState extends State<Authenticate> {
+  bool signinPage = true;
+
+  //toggle pages
+  void switchPages() {
+    setState(() {
+      signinPage = !signinPage;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Sign_In();
+    if (signinPage == true) {
+      return Sign_In(
+        toggle: switchPages,
+      );
+    } else {
+      return Register(
+        toggle: switchPages,
+      );
+    }
   }
 }

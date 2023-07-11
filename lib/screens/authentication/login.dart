@@ -5,7 +5,9 @@ import 'package:firebase_auth_tutorial/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class Sign_In extends StatefulWidget {
-  const Sign_In({super.key});
+  //function
+  final Function toggle;
+  const Sign_In({super.key, required this.toggle});
 
   @override
   State<Sign_In> createState() => _Sign_InState();
@@ -13,7 +15,7 @@ class Sign_In extends StatefulWidget {
 
 class _Sign_InState extends State<Sign_In> {
   //ref for the AuthSrvoces class in the auth.dart
-  final AuthServices _authServices = AuthServices();
+  final AuthServices _auth = AuthServices();
 
   //form key
   final _formKey = GlobalKey<FormState>();
@@ -21,6 +23,7 @@ class _Sign_InState extends State<Sign_In> {
   //email & password state
   String email = "";
   String password = "";
+  String error = "";
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class _Sign_InState extends State<Sign_In> {
               ),
               Center(
                 child: Image.asset(
-                  "assets/images/login.jpg",
+                  "assets/images/firebase.png",
                   height: 150,
                   width: 300,
                 ),
@@ -56,12 +59,13 @@ class _Sign_InState extends State<Sign_In> {
                     children: [
                       //email
                       TextFormField(
+                        style: const TextStyle(color: Colors.white),
                         decoration: textInputDecoration,
-                        validator: (value) =>
-                            value?.isEmpty == true ? "Enter Valid Email" : null,
-                        onChanged: (value) {
+                        validator: (val) =>
+                            val!.isEmpty ? "Enter Valid Email" : null,
+                        onChanged: (val) {
                           setState(() {
-                            email = value;
+                            email = val;
                           });
                         },
                       ),
@@ -70,19 +74,28 @@ class _Sign_InState extends State<Sign_In> {
                       ),
                       //password
                       TextFormField(
+                        obscureText: true,
+                        style: const TextStyle(color: Colors.white),
                         decoration:
                             textInputDecoration.copyWith(hintText: "password"),
-                        validator: (value) =>
-                            value!.length < 6 ? "Enter a Valid Password" : null,
-                        onChanged: (value) {
+                        validator: (val) =>
+                            val!.length < 6 ? "Enter a Valid Password" : null,
+                        onChanged: (val) {
                           setState(() {
-                            email = value;
+                            password = val;
                           });
                         },
                       ),
                       //google
                       const SizedBox(
-                        height: 15,
+                        height: 10,
+                      ),
+                      Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(
+                        height: 10,
                       ),
                       const Text(
                         "Login with social accounts ",
@@ -116,7 +129,9 @@ class _Sign_InState extends State<Sign_In> {
                           ),
                           GestureDetector(
                             //Goto the register page
-                            onTap: () {},
+                            onTap: () {
+                              widget.toggle();
+                            },
                             child: const Text(
                               "REGISTER",
                               style: TextStyle(
@@ -132,7 +147,16 @@ class _Sign_InState extends State<Sign_In> {
                       ),
                       GestureDetector(
                         //Method for login user
-                        onTap: () {},
+                        onTap: () async {
+                          dynamic result = await _auth
+                              .signInUsingEmailAndPassword(email, password);
+
+                          if (result == null) {
+                            setState(() {
+                              error = "Could not signin with those credentials";
+                            });
+                          }
+                        },
                         child: Container(
                           height: 40,
                           width: 200,
@@ -144,7 +168,7 @@ class _Sign_InState extends State<Sign_In> {
                                 color: mainYellow,
                               )),
                           child: const Center(
-                            child: const Text(
+                            child: Text(
                               "LOG IN",
                               style: TextStyle(
                                   color: Colors.white,
@@ -159,7 +183,9 @@ class _Sign_InState extends State<Sign_In> {
                       //anonymos
                       GestureDetector(
                         //Method for login anonymous
-                        onTap: () {},
+                        onTap: () async {
+                          await _auth.signInAnonymously();
+                        },
                         child: Container(
                           height: 40,
                           width: 200,
@@ -171,7 +197,7 @@ class _Sign_InState extends State<Sign_In> {
                                 color: mainYellow,
                               )),
                           child: const Center(
-                            child: const Text(
+                            child: Text(
                               "LOGIN As GUEST",
                               style: TextStyle(
                                   color: Colors.white,

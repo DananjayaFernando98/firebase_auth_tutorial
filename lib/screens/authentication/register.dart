@@ -5,7 +5,8 @@ import '../../constants/style.dart';
 import '../../services/auth.dart';
 
 class Register extends StatefulWidget {
-  const Register({super.key});
+  final Function toggle;
+  const Register({super.key, required this.toggle});
 
   @override
   State<Register> createState() => _RegisterState();
@@ -13,7 +14,7 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   //ref for the AuthSrvoces class in the auth.dart
-  final AuthServices _authServices = AuthServices();
+  final AuthServices _auth = AuthServices();
 
   //form key
   final _formKey = GlobalKey<FormState>();
@@ -21,6 +22,7 @@ class _RegisterState extends State<Register> {
   //email & password state
   String email = "";
   String password = "";
+  String error = "";
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +44,12 @@ class _RegisterState extends State<Register> {
               ),
               Center(
                 child: Image.asset(
-                  "assets/images/login.jpg",
-                  height: 200,
-                  width: 200,
+                  "assets/images/firebase.png",
+                  height: 150,
+                  width: 300,
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Form(
@@ -58,12 +58,13 @@ class _RegisterState extends State<Register> {
                     children: [
                       //email
                       TextFormField(
+                        style: const TextStyle(color: Colors.white),
                         decoration: textInputDecoration,
-                        validator: (value) =>
-                            value?.isEmpty == true ? "Enter Valid Email" : null,
-                        onChanged: (value) {
+                        validator: (val) =>
+                            val!.isEmpty ? "Enter Valid Email" : null,
+                        onChanged: (val) {
                           setState(() {
-                            email = value;
+                            email = val;
                           });
                         },
                       ),
@@ -72,19 +73,29 @@ class _RegisterState extends State<Register> {
                       ),
                       //password
                       TextFormField(
+                        obscureText: true,
+                        style: const TextStyle(color: Colors.white),
                         decoration:
                             textInputDecoration.copyWith(hintText: "password"),
-                        validator: (value) =>
-                            value!.length < 6 ? "Enter a Valid Password" : null,
-                        onChanged: (value) {
+                        validator: (val) =>
+                            val!.length < 6 ? "Enter a Valid Password" : null,
+                        onChanged: (val) {
                           setState(() {
-                            email = value;
+                            password = val;
                           });
                         },
                       ),
                       //google
                       const SizedBox(
                         height: 20,
+                      ),
+                      //error text
+                      Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(
+                        height: 10,
                       ),
                       const Text(
                         "Register with social accounts ",
@@ -118,7 +129,9 @@ class _RegisterState extends State<Register> {
                           ),
                           GestureDetector(
                             //Goto the register page
-                            onTap: () {},
+                            onTap: () {
+                              widget.toggle();
+                            },
                             child: const Text(
                               "LOGIN",
                               style: TextStyle(
@@ -134,7 +147,15 @@ class _RegisterState extends State<Register> {
                       ),
                       GestureDetector(
                         //Method for login user
-                        onTap: () {},
+                        onTap: () async {
+                          dynamic result = await _auth
+                              .registerWithEmailAndPassword(email, password);
+
+                          if (result == null) {
+                            //error
+                            error = "Please Enter Valid Email";
+                          }
+                        },
                         child: Container(
                           height: 40,
                           width: 200,
